@@ -27,4 +27,17 @@ jobs:
             done
 
             docker compose restart n8n
-            echo "Deployment complete"
+            sleep 10
+
+            WORKFLOW_ID=$(curl -s "https://13.221.4.159.nip.io/api/v1/workflows" \
+              -H "X-N8N-API-KEY: ${{ secrets.N8N_API_KEY }}" | \
+              jq -r '.data[0].id')
+
+            echo "Activating workflow ID: $WORKFLOW_ID"
+
+            curl -X PATCH "https://13.221.4.159.nip.io/api/v1/workflows/$WORKFLOW_ID" \
+              -H "X-N8N-API-KEY: ${{ secrets.N8N_API_KEY }}" \
+              -H "Content-Type: application/json" \
+              -d '{"active": true}'
+
+            echo "Deployment complete - workflow activated"
